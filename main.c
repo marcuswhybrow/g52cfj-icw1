@@ -8,16 +8,23 @@ int main (int argc, const char* argv[]) {
 	
 	FILE* words = fopen(wordsPath, "r");
 	unsigned int lineCount = 0;
+	unsigned int longestWordLength = 0;
+	unsigned int currentWordLength = 0;
 	
 	if (words == NULL)
 		perror("Error opening file");
 	else
-		while (! feof(words))
-			if (fgetc(words) == '\n')
+		while (! feof(words)) {
+			if (fgetc(words) == '\n') {
 				lineCount++;
+				if (currentWordLength > longestWordLength)
+					longestWordLength = currentWordLength;
+				currentWordLength = 0;
+			} else
+				currentWordLength++;
+		}
 	
-	printf("%d\n", lineCount);
-
+	printf("word count: %d, longest word length: %d\n", lineCount, longestWordLength);
 	
     return 0;
 }
