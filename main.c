@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define TRUE 1
+#define FALSE 0
+
 int longestWordLength = 0;
 
 typedef struct {
@@ -47,15 +50,65 @@ void getWord(char* word, int index, char* path) {
 	word[strlen(word) - 1] = '\0';
 }
 
+int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
+	for (unsigned short i = 0; i < strlen(guessedWord); i++)
+		if (word[i] == c && guessedWord[i] == '-')
+			return i;
+	return -1;
+}
+
+void play(char* word) {
+	char input[100];
+	unsigned short guesses = 10;
+	char guessedWord[strlen(word)];
+	char letters[27];
+	unsigned short lettersRemaining = strlen(word);
+	int charIndex;
+	
+	strcpy(guessedWord, word);
+	
+	/* Populate the available letters array */
+	for (char c = 'A'; (int)c <= (int)'Z'; c++)
+		letters[(int)c - (int)'A'] = c;
+	letters[26] = '\0';
+	
+	/* Fill the guessedWord with '-' in order to hide the letters */
+	for (unsigned short i = 0; i < strlen(guessedWord); i++)
+		guessedWord[i] = '-';
+	
+	while (TRUE) {
+		printf("\n-\n\n");
+		printf("Guess the word : '%s'\n", guessedWord);
+		printf("Available      : %s\n", letters);
+		printf("%d more wrong guesses permitted.\n", guesses);
+		printf("%s\n", word);
+		printf("Type the letter of your guess and ENTER/RETURN: ");
+		fgets(input, 100, stdin);
+		
+		charIndex = hasUdiscoveredChar(input[0], guessedWord, word);
+		if (charIndex >= 0) {
+			guessedWord[charIndex] = word[charIndex];
+			printf("*** Yes! ’%c’ exists in the secret word. First match has been labelled.\n", input[0]);
+			printf("*** You have %d letters still to guess.\n", --lettersRemaining);
+			if (hasUdiscoveredChar(input[0], guessedWord, word) < 0)
+				letters[(int)input[0] - (int)'a'] = '-';
+		} else {
+			printf("*** Wrong! You are permitted another %d wrong guesses before you lose.\n", --guesses);
+		}
+	}
+}
+
 int main (int argc, const char* argv[]) {
 	
 	// This path differs on non Mac operating systems
 	char* wordsPath = "/usr/share/dict/words";
+	unsigned int seed;
 	
 	DictInfo dictInfo = getDictionaryInfo(wordsPath);
 	longestWordLength = dictInfo.longestWordLength;
 	
-	srand(time(NULL));
+	seed = (unsigned int)time(NULL);
+	srand(seed);
 	
 	int wordIndex;
 	do {
@@ -65,7 +118,13 @@ int main (int argc, const char* argv[]) {
 	char word[dictInfo.longestWordLength];
 	getWord(word, wordIndex, wordsPath);
 	
-	printf("Word: %s, Word Index: %d, Total Words: %d", word, wordIndex, dictInfo.wordCount);
+	printf("Welcome to CFJ Hangman (G52CFJ Coursework 1)\n");
+	printf("-\n");
+	printf("Random seed was %d\n", seed);
+	printf("Load dictionary from file: '%s'\n", wordsPath);
+	printf("%d words with max length %d\n", dictInfo.wordCount, dictInfo.longestWordLength);
+	
+	play(word);
 	
     return 0;
 }
