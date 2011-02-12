@@ -87,13 +87,33 @@ void play(char* word) {
 		
 		charIndex = hasUdiscoveredChar(input[0], guessedWord, word);
 		if (charIndex >= 0) {
+			/* A correct guess */
+			
+			/* Reveal the character that the player guessed correctly */
 			guessedWord[charIndex] = word[charIndex];
+			
+			/* Give the player information on their progression */
 			printf("*** Yes! ’%c’ exists in the secret word. First match has been labelled.\n", input[0]);
 			printf("*** You have %d letters still to guess.\n", --lettersRemaining);
+			
+			/* Remove the character form the available letters array if there are no more of this letter */
 			if (hasUdiscoveredChar(input[0], guessedWord, word) < 0)
 				letters[(int)input[0] - (int)'a'] = '-';
+			
+			/* The player has won if there are no more letters to be guessed */
+			if (lettersRemaining <= 0) {
+				printf("*** Well done, you have guessed all of the letters.\n");
+				printf("\nWell done! The word was ’%s’.\n", word);
+				break;
+			}
 		} else {
-			printf("*** Wrong! You are permitted another %d wrong guesses before you lose.\n", --guesses);
+			/* An incorrect guess */
+			if (--guesses <= 0) {
+				printf("\nUnfortunately you are out of guesses, the word was '%s'.\n", word);
+				break;
+			} else
+				printf("*** Wrong! You are permitted another %d wrong guesses before you lose.\n", guesses);
+			
 		}
 	}
 }
