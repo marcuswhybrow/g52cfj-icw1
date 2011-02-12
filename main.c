@@ -9,28 +9,23 @@
 int longestWordLength = 0;
 
 typedef struct {
-	unsigned int wordCount;
-	unsigned int longestWordLength;
+	unsigned int wordCount, longestWordLength;
 } DictInfo;
 
 DictInfo getDictionaryInfo(char* path) {
 	FILE* file = fopen(path, "r");
-	DictInfo dictInfo;
-	dictInfo.wordCount = 0;
-	dictInfo.longestWordLength = 0;
-	unsigned int currentWordLength = 0;
+	DictInfo dictInfo = {0,0};
+	char word[longestWordLength];
+	unsigned short length;
 	
 	if (file == NULL)
 		perror("Error opening file");
 	else
-		while (! feof(file)) {
-			if (fgetc(file) == '\n') {
-				dictInfo.wordCount++;
-				if (currentWordLength > dictInfo.longestWordLength)
-					dictInfo.longestWordLength = currentWordLength;
-				currentWordLength = 0;
-			} else
-				currentWordLength++;
+		for (dictInfo.wordCount; ! feof(file); dictInfo.wordCount++) {
+			fscanf(file, "%s\n", word);
+			length = strlen(word);
+			if (length > dictInfo.longestWordLength)
+				dictInfo.longestWordLength = length;
 		}
 	fclose(file);
 	
@@ -38,16 +33,10 @@ DictInfo getDictionaryInfo(char* path) {
 }
 
 void getWord(char* word, int index, char* path) {
-	unsigned int count = 0;
 	FILE* file = fopen(path, "r");
-	while (! feof(file) && count < index) {
-		count++;
-		fgets(word, longestWordLength, file);
-	}
+	for (unsigned int count = 0; ! feof(file) && count < index; count++)
+		fscanf(file, "%s\n", word);
 	fclose(file);
-	
-	/* Assumes a new line character at the end of the string, and removes it */
-	word[strlen(word) - 1] = '\0';
 }
 
 int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
