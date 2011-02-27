@@ -6,6 +6,24 @@
 #define TRUE 1
 #define FALSE 0
 
+typedef struct {
+	unsigned int wordCount, longestWordLength, acceptableWordCount, longestAcceptableWordLength;
+} DictInfo;
+
+typedef struct {
+	char* word;
+	char* guesses;
+	char* finalState;
+	char* remainingLetters;
+	struct RoundResultItem* nextResult;
+} RoundResultItem;
+
+typedef struct {
+	RoundResultItem* head;
+	RoundResultItem* tail;
+	unsigned int length;
+} RoundResults;
+
 char* wordsPath;
 unsigned int longestWordLength = 0;
 unsigned int wordCount = 0;
@@ -13,10 +31,28 @@ unsigned int longestAcceptableWordLength = 0;
 unsigned int acceptableWordCount = 0;
 int allowCaps = FALSE;
 int maxWrongGuesses = 10;
+RoundResults results = {NULL, NULL, 0};
 
-typedef struct {
-	unsigned int wordCount, longestWordLength, acceptableWordCount, longestAcceptableWordLength;
-} DictInfo;
+char* putOnHeap(char* str) {
+	char* heapStr = calloc(strlen(str)+1, sizeof(char));
+	strcpy(heapStr, str);
+	return heapStr;
+}
+
+void addResult(char* word, char* guesses, char* finalState, char* remainingLetters) {
+	RoundResultItem* item = malloc(sizeof(RoundResultItem));
+	item->word = putOnHeap(word);
+	item->guesses = (char*)putOnHeap(guesses);
+	item->finalState = (char*)putOnHeap(finalState);
+	item->remainingLetters = (char*)putOnHeap(remainingLetters);
+	
+	if (results.length == 0)
+		results.tail = item;
+	else
+		results.head->nextResult = (struct RoundResultItem*)item;
+	results.head = item;
+	results.length++;
+}
 
 int isAcceptableWord(char* word) {
 	unsigned int i = strlen(word);
@@ -97,8 +133,10 @@ void playRound(char* word) {
 	int charIndex;
 	char guessedWordChar;
 	char guess[2] = {'\0', '\0'};
+	RoundResultItem* currentItem;
 	
 	strcpy(guessedWord, word);
+	strcpy(guessedSoFar, "");
 	
 	/* Populate the available letters array */
 	for (char c = 'A'; (int)c <= (int)'Z'; c++)
@@ -129,6 +167,15 @@ void playRound(char* word) {
 				break;
 			case '*':
 				/* Display the words that have been used so far, along with the guesses */
+				currentItem = results.tail;
+				for (int i = 0; i < results.length; i++) {
+					printf("\nWord number : %d\n", i+1);
+					printf("Word        : '%s'\n", currentItem->word);
+					printf("Final guess : '%s'\n", currentItem->finalState);
+					printf("Remaining   : '%s'\n", currentItem->remainingLetters);
+					printf("Guesses     : '%s'\n", currentItem->guesses);
+					currentItem = (RoundResultItem*)currentItem->nextResult;
+				}
 				break;
 			case '$':
 				/* Save the current words and guesses to a ﬁle */
@@ -157,12 +204,14 @@ void playRound(char* word) {
 					if (lettersRemaining <= 0) {
 						printf("*** Well done, you have guessed all of the letters.\n");
 						printf("\nWell done! The word was ’%s’.\n", word);
+						addResult(word, guessedSoFar, guessedWord, letters);
 						return;
 					}
 				} else {
 					/* An incorrect guess */
 					if (--guesses <= 0) {
 						printf("\nUnfortunately you are out of guesses, the word was '%s'.\n", word);
+						addResult(word, guessedSoFar, guessedWord, letters);
 						return;
 					} else
 						printf("*** Wrong! You are permitted another %d wrong guesses before you lose.\n", guesses);
