@@ -124,7 +124,7 @@ int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
 }
 
 void playRound(char* word) {
-	char input[100];
+	char input[1024];
 	unsigned short guesses = maxWrongGuesses;
 	char guessedWord[strlen(word)];
 	char guessedSoFar[strlen(word)+guesses];
@@ -134,6 +134,8 @@ void playRound(char* word) {
 	char guessedWordChar;
 	char guess[2] = {'\0', '\0'};
 	RoundResultItem* currentItem;
+	char* path;
+	FILE* file;
 	
 	strcpy(guessedWord, word);
 	strcpy(guessedSoFar, "");
@@ -179,6 +181,44 @@ void playRound(char* word) {
 				break;
 			case '$':
 				/* Save the current words and guesses to a ﬁle */
+				printf("\nSpecify a file to write the game history to:\n");
+				
+				/* Get the path from the user */
+				fgets(input, 1024, stdin);
+				
+				/* Allocate a more appropriately sized bit of memory */
+				path = calloc(strlen(input), sizeof(char));
+				strcpy(path, input);
+				
+				/* Remove new line character from input */
+				path[strlen(path)-1] = '\0';
+				
+				/* Ask for confirmation */
+				printf("Are you sure you want to overwrite the file '%s' (y/N): ", path);
+				fgets(input, 1024, stdin);
+				switch (input[0]) {
+					case 'y':
+					case 'Y':
+						/* Write to file */
+						file = fopen(path, "w");
+						currentItem = results.tail;
+						for (int i = 0; i < results.length; i++) {
+							fprintf(file, "Word %d: '%s', '%s', '%s', '%s'\n",
+									i+1, currentItem->word, currentItem->finalState,
+									currentItem->remainingLetters, currentItem->guesses);
+							currentItem = (RoundResultItem*)currentItem->nextResult;
+						}
+						fclose(file);
+						printf("Written to file '%s'!", path);
+						break;
+					default:
+						/* Do not write to file */
+						printf("Aborted, did NOT write to file!");
+						break;
+				}
+				
+				/* Deallocated the path memory allocated earlier */
+				free(path);
 				break;
 			default:
 				guess[0] = input[0];
