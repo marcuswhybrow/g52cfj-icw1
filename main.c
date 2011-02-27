@@ -6,7 +6,9 @@
 #define TRUE 1
 #define FALSE 0
 
-int longestWordLength = 0;
+char* wordsPath;
+unsigned int longestWordLength = 0;
+unsigned int wordCount = 0;
 
 typedef struct {
 	unsigned int wordCount, longestWordLength;
@@ -32,11 +34,15 @@ DictInfo getDictionaryInfo(char* path) {
 	return dictInfo;
 }
 
-void getWord(char* word, int index, char* path) {
+char* getWord(int index, char* path) {
+	char word[longestWordLength];
 	FILE* file = fopen(path, "r");
 	for (unsigned int count = 0; ! feof(file) && count < index; count++)
 		fscanf(file, "%s\n", word);
 	fclose(file);
+	char* w = malloc(sizeof(strlen(word)+1));
+	strcpy(w, word);
+	return w;
 }
 
 int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
@@ -107,33 +113,60 @@ void playRound(char* word) {
 	}
 }
 
-int main (int argc, const char* argv[]) {
-	
-	// This path differs on non Mac operating systems
-	char* wordsPath = "/usr/share/dict/words";
-	unsigned int seed;
-	
-	DictInfo dictInfo = getDictionaryInfo(wordsPath);
-	longestWordLength = dictInfo.longestWordLength;
-	
-	seed = (unsigned int)time(NULL);
-	srand(seed);
-	
+unsigned int setSeed(unsigned int seed) {
+	unsigned int s;
+	if (seed == -1) {
+		s = (unsigned int)time(NULL);
+		srand(s);
+		return s;
+	} else
+		return seed;
+
+}
+
+void setGlobals(char* wp) {
+	wordsPath = wp;
+	DictInfo di = getDictionaryInfo(wordsPath);
+	longestWordLength = di.longestWordLength;
+	wordCount = di.wordCount;
+}
+
+char* readRandomWord() {
 	int wordIndex;
 	do {
 		wordIndex = rand();
-	} while (wordIndex >= dictInfo.wordCount);
+	} while (wordIndex >= wordCount);
 	
-	char word[dictInfo.longestWordLength];
-	getWord(word, wordIndex, wordsPath);
+	return getWord(wordIndex, wordsPath);
+}
+
+void playGame() {
+	char* word;
+	
+	while (TRUE) {
+		word = readRandomWord();
+		playRound(word);
+		free(word);
+	}
+}
+
+int main (int argc, const char* argv[]) {
+	
+	// This path differs on non Mac operating systems
+	char* wp = "/usr/share/dict/words";
+	unsigned int seed = -1;
+	
+	// Initialisation
+	setGlobals(wp);
+	seed = setSeed(seed);
 	
 	printf("Welcome to CFJ Hangman (G52CFJ Coursework 1)\n");
 	printf("-\n");
 	printf("Random seed was %d\n", seed);
 	printf("Load dictionary from file: '%s'\n", wordsPath);
-	printf("%d words with max length %d\n", dictInfo.wordCount, dictInfo.longestWordLength);
+	printf("%d words with max length %d\n", wordCount, longestWordLength);
 	
-	playRound(word);
+	playGame();
 	
     return 0;
 }
