@@ -21,7 +21,9 @@ would all be considered names, and accepted as words.
 Dictionary words in memory
 ==========================
 
-Rather than loading all words into memory, an initial read of every line in the specified dictionary file discovers how many entries there are and records the length of the longest word found.
+Rather than loading all words into memory, an initial read of every line in 
+the specified dictionary file discovers how many entries there are and records 
+the length of the longest word found.
 
 This information then allows the retrieval of a random word to be calculated 
 more fairly. Only the current word is held in memory and the file is accessed 
