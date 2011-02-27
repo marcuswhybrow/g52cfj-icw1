@@ -60,10 +60,8 @@ int isAcceptableWord(char* word) {
 	
 	while (i--) {
 		c = word[i];
-		if (! (c >= 'a' && c <= 'z' || i == 0 && allowCaps && c >= 'A' && c <= 'Z')) {
-			printf("Unacceptable Word: %s\n", word);
+		if (! (c >= 'a' && c <= 'z' || allowCaps && (word[0] >= 'A' && word[0] <= 'Z') && c >= 'A' && c <= 'Z'))
 			return FALSE;
-		}
 	}
 	return TRUE;
 }
