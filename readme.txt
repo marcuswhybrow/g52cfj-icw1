@@ -8,7 +8,7 @@ coursework.
 The -n flag
 ===========
 
-A word is accept as a name if it has a capitol letter as it's first letter. 
+A word is accepted as a name if it has a capital letter as it's first letter. 
 From then on any character may be capitalised, for example
 
 * USA
@@ -27,5 +27,5 @@ the length of the longest word found.
 
 This information then allows the retrieval of a random word to be calculated 
 more fairly. Only the current word is held in memory and the file is accessed 
-again and to load in each new random word, this was judge to be more efficient 
-at least in terms of memory.
+again in order to load in each new random word, this was judged to be more 
+efficient (at least in terms of memory).
