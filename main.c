@@ -126,8 +126,10 @@ unsigned int setSeed(unsigned int seed) {
 		s = (unsigned int)time(NULL);
 		srand(s);
 		return s;
-	} else
+	} else {
+		srand(seed);
 		return seed;
+	}
 
 }
 
@@ -150,7 +152,11 @@ void playGame() {
 	char* word;
 	
 	while (TRUE) {
-		word = readRandomWord();
+		/* Honours the allowCaps setting */
+		do {
+			word = readRandomWord();
+		} while (! allowCaps && word[0] < 'a');
+		
 		playRound(word);
 		free(word);
 	}
