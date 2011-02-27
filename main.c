@@ -9,6 +9,8 @@
 char* wordsPath;
 unsigned int longestWordLength = 0;
 unsigned int wordCount = 0;
+int allowCaps = FALSE;
+int maxWrongGuesses = 10;
 
 typedef struct {
 	unsigned int wordCount, longestWordLength;
@@ -20,9 +22,10 @@ DictInfo getDictionaryInfo(char* path) {
 	char word[longestWordLength];
 	unsigned short length;
 	
-	if (file == NULL)
+	if (file == NULL) {
 		perror("Error opening file");
-	else
+		exit(1);
+	} else
 		for (dictInfo.wordCount; ! feof(file); dictInfo.wordCount++) {
 			fscanf(file, "%s\n", word);
 			length = strlen(word);
@@ -40,7 +43,7 @@ char* getWord(int index, char* path) {
 	for (unsigned int count = 0; ! feof(file) && count < index; count++)
 		fscanf(file, "%s\n", word);
 	fclose(file);
-	char* w = malloc(sizeof(strlen(word)+1));
+	char* w = calloc(strlen(word)+1, sizeof(char));
 	strcpy(w, word);
 	return w;
 }
@@ -56,7 +59,7 @@ int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
 
 void playRound(char* word) {
 	char input[100];
-	unsigned short guesses = 10;
+	unsigned short guesses = maxWrongGuesses;
 	char guessedWord[strlen(word)];
 	char letters[27];
 	unsigned short lettersRemaining = strlen(word);
@@ -128,8 +131,7 @@ unsigned int setSeed(unsigned int seed) {
 
 }
 
-void setGlobals(char* wp) {
-	wordsPath = wp;
+void setGlobals() {
 	DictInfo di = getDictionaryInfo(wordsPath);
 	longestWordLength = di.longestWordLength;
 	wordCount = di.wordCount;
@@ -155,20 +157,59 @@ void playGame() {
 }
 
 int main (int argc, const char* argv[]) {
-	
-	/* This path differs on non Mac operating systems */
-	char* wp = "/usr/share/dict/words";
 	unsigned int seed = -1;
 	
-	/* Initialisation */
-	setGlobals(wp);
-	seed = setSeed(seed);
+	char arg[100];
+	char flag;
+	int i = argc;
+	
+	char path[1024];
+	
+	while (i--) {
+		if (sscanf(argv[i], "-%c%s", &flag, arg) > 0) {
+			switch (flag) {
+				case 'g':
+				case 'G':
+					/* Number of wrong guesses */
+					sscanf(arg, "%u", &maxWrongGuesses);
+					break;
+				case 's':
+				case 'S':
+					/* The seed */
+					sscanf(arg, "%u", &seed);
+					break;
+				case 'f':
+				case 'F':
+					/* File path to the dictionary of words */
+					sscanf(arg, "%s", path);
+					wordsPath = calloc(strlen(path)+1, sizeof(char));
+					strcpy(wordsPath, path);
+					break;
+				case 'n':
+				case 'N':
+					/* Allow real names (words that start with a capitol) */
+					allowCaps = TRUE;
+					break;
+			}
+		}
+	}
+	
+	if (!wordsPath)
+		wordsPath = "/usr/share/dict/words";
 	
 	printf("Welcome to CFJ Hangman (G52CFJ Coursework 1)\n");
 	printf("-\n");
+	
+	seed = setSeed(seed);
+	
 	printf("Random seed was %d\n", seed);
 	printf("Load dictionary from file: '%s'\n", wordsPath);
+
+	/* Initialisation - loads dictionary */
+	setGlobals();
+	
 	printf("%d words with max length %d\n", wordCount, longestWordLength);
+	printf("Real names %s allowed\n", allowCaps ? "ARE" : "are NOT");
 	
 	playGame();
 	
