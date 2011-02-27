@@ -99,7 +99,8 @@ DictInfo getDictionaryInfo(char* path) {
 char* getWord(int index, char* path) {
 	char word[longestWordLength];
 	FILE* file = fopen(path, "r");
-	for (unsigned int count = 0; ! feof(file) && count < index; count++)
+	unsigned int count;
+	for (count = 0; ! feof(file) && count < index; count++)
 		fscanf(file, "%s\n", word);
 	fclose(file);
 	char* w = calloc(strlen(word)+1, sizeof(char));
@@ -115,7 +116,8 @@ int areEqual(char c1, char c2) {
 }
 
 int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
-	for (unsigned short i = 0; i < strlen(guessedWord); i++)
+	unsigned short i;
+	for (i = 0; i < strlen(guessedWord); i++)
 		if (areEqual(word[i], c) && guessedWord[i] == '-')
 			return i;
 	return -1;
@@ -139,12 +141,14 @@ void playRound(char* word) {
 	strcpy(guessedSoFar, "");
 	
 	/* Populate the available letters array */
-	for (char c = 'A'; (int)c <= (int)'Z'; c++)
+	char c;
+	for (c = 'A'; (int)c <= (int)'Z'; c++)
 		letters[c - 'A'] = c;
 	letters[26] = '\0';
 	
 	/* Fill the guessedWord with '-' in order to hide the letters */
-	for (unsigned short i = 0; i < strlen(guessedWord); i++)
+	unsigned short i;
+	for (i = 0; i < strlen(guessedWord); i++)
 		guessedWord[i] = '-';
 	
 	while (TRUE) {
@@ -168,7 +172,8 @@ void playRound(char* word) {
 			case '*':
 				/* Display the words that have been used so far, along with the guesses */
 				currentItem = results.tail;
-				for (int i = 0; i < results.length; i++) {
+				int i;
+				for (i = 0; i < results.length; i++) {
 					printf("\nWord number : %d\n", i+1);
 					printf("Word        : '%s'\n", currentItem->word);
 					printf("Final guess : '%s'\n", currentItem->finalState);
@@ -200,7 +205,8 @@ void playRound(char* word) {
 						/* Write to file */
 						file = fopen(path, "w");
 						currentItem = results.tail;
-						for (int i = 0; i < results.length; i++) {
+						int i;
+						for (i = 0; i < results.length; i++) {
 							fprintf(file, "Word %d: '%s', '%s', '%s', '%s'\n",
 									i+1, currentItem->word, currentItem->finalState,
 									currentItem->remainingLetters, currentItem->guesses);
