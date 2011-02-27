@@ -201,7 +201,7 @@ int main (int argc, const char* argv[]) {
 	}
 	
 	if (!wordsPath)
-		wordsPath = "/usr/share/dict/words";
+		wordsPath = "/usr/dict/words";
 	
 	printf("Welcome to CFJ Hangman (G52CFJ Coursework 1)\n");
 	printf("-\n");
