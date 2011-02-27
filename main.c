@@ -9,26 +9,51 @@
 char* wordsPath;
 unsigned int longestWordLength = 0;
 unsigned int wordCount = 0;
+unsigned int longestAcceptableWordLength = 0;
+unsigned int acceptableWordCount = 0;
 int allowCaps = FALSE;
 int maxWrongGuesses = 10;
 
 typedef struct {
-	unsigned int wordCount, longestWordLength;
+	unsigned int wordCount, longestWordLength, acceptableWordCount, longestAcceptableWordLength;
 } DictInfo;
+
+int isAcceptableWord(char* word) {
+	unsigned int i = strlen(word);
+	char c;
+	
+	while (i--) {
+		c = word[i];
+		if (! (c >= 'a' && c <= 'z' || i == 0 && allowCaps && c >= 'A' && c <= 'Z')) {
+			printf("Unacceptable Word: %s\n", word);
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
 
 DictInfo getDictionaryInfo(char* path) {
 	FILE* file = fopen(path, "r");
-	DictInfo dictInfo = {0,0};
-	char word[longestWordLength];
+	DictInfo dictInfo = {0,0,0,0};
+	char word[1024];
 	unsigned short length;
 	
 	if (file == NULL) {
 		perror("Error opening file");
 		exit(1);
 	} else
-		for (dictInfo.wordCount; ! feof(file); dictInfo.wordCount++) {
+		for (; ! feof(file); dictInfo.wordCount++) {
 			fscanf(file, "%s\n", word);
 			length = strlen(word);
+			
+			/* Update the acceptable word counts */
+			if (isAcceptableWord(word)) {
+				dictInfo.acceptableWordCount++;
+				if (length > dictInfo.longestAcceptableWordLength)
+					dictInfo.longestAcceptableWordLength = length;
+			}
+			
+			/* Update the total word counts */
 			if (length > dictInfo.longestWordLength)
 				dictInfo.longestWordLength = length;
 		}
@@ -48,11 +73,16 @@ char* getWord(int index, char* path) {
 	return w;
 }
 
+int areEqual(char c1, char c2) {
+	if (c1 <= 'Z') c1 += 32;
+	if (c2 <= 'Z') c2 += 32;
+	
+	return c1 == c2;
+}
+
 int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
-	if (c <= 'Z')
-		c += 'a' - 'A';
 	for (unsigned short i = 0; i < strlen(guessedWord); i++)
-		if (word[i] == c && guessedWord[i] == '-')
+		if (areEqual(word[i], c) && guessedWord[i] == '-')
 			return i;
 	return -1;
 }
@@ -137,15 +167,18 @@ void setGlobals() {
 	DictInfo di = getDictionaryInfo(wordsPath);
 	longestWordLength = di.longestWordLength;
 	wordCount = di.wordCount;
+	longestAcceptableWordLength = di.longestAcceptableWordLength;
+	acceptableWordCount = di.acceptableWordCount;
 }
 
 char* readRandomWord() {
 	int wordIndex;
+	char* word;
 	do {
 		wordIndex = rand();
 	} while (wordIndex >= wordCount);
 	
-	return getWord(wordIndex, wordsPath);
+	return word = getWord(wordIndex, wordsPath);
 }
 
 void playGame() {
@@ -155,7 +188,7 @@ void playGame() {
 		/* Honours the allowCaps setting */
 		do {
 			word = readRandomWord();
-		} while (! allowCaps && word[0] < 'a');
+		} while (! isAcceptableWord(word));
 		
 		playRound(word);
 		free(word);
@@ -215,6 +248,7 @@ int main (int argc, const char* argv[]) {
 	setGlobals();
 	
 	printf("%d words with max length %d\n", wordCount, longestWordLength);
+	printf("%d acceptable words with max length %d\n", acceptableWordCount, longestAcceptableWordLength);
 	printf("Real names %s allowed\n", allowCaps ? "ARE" : "are NOT");
 	
 	playGame();
