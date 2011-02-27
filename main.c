@@ -46,6 +46,8 @@ char* getWord(int index, char* path) {
 }
 
 int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
+	if (c <= 'Z')
+		c += 'a' - 'A';
 	for (unsigned short i = 0; i < strlen(guessedWord); i++)
 		if (word[i] == c && guessedWord[i] == '-')
 			return i;
@@ -59,12 +61,13 @@ void playRound(char* word) {
 	char letters[27];
 	unsigned short lettersRemaining = strlen(word);
 	int charIndex;
+	char guessedWordChar;
 	
 	strcpy(guessedWord, word);
 	
 	/* Populate the available letters array */
 	for (char c = 'A'; (int)c <= (int)'Z'; c++)
-		letters[(int)c - (int)'A'] = c;
+		letters[c - 'A'] = c;
 	letters[26] = '\0';
 	
 	/* Fill the guessedWord with '-' in order to hide the letters */
@@ -83,17 +86,18 @@ void playRound(char* word) {
 		charIndex = hasUdiscoveredChar(input[0], guessedWord, word);
 		if (charIndex >= 0) {
 			/* A correct guess */
+			guessedWordChar = word[charIndex];
 			
 			/* Reveal the character that the player guessed correctly */
-			guessedWord[charIndex] = word[charIndex];
+			guessedWord[charIndex] = guessedWordChar;
 			
 			/* Give the player information on their progression */
 			printf("*** Yes! ’%c’ exists in the secret word. First match has been labelled.\n", input[0]);
 			printf("*** You have %d letters still to guess.\n", --lettersRemaining);
 			
 			/* Remove the character form the available letters array if there are no more of this letter */
-			if (hasUdiscoveredChar(input[0], guessedWord, word) < 0)
-				letters[(int)input[0] - (int)'a'] = '-';
+			if (hasUdiscoveredChar(guessedWordChar, guessedWord, word) < 0)
+				letters[guessedWordChar - 'a'] = '-';
 			
 			/* The player has won if there are no more letters to be guessed */
 			if (lettersRemaining <= 0) {
@@ -152,11 +156,11 @@ void playGame() {
 
 int main (int argc, const char* argv[]) {
 	
-	// This path differs on non Mac operating systems
+	/* This path differs on non Mac operating systems */
 	char* wp = "/usr/share/dict/words";
 	unsigned int seed = -1;
 	
-	// Initialisation
+	/* Initialisation */
 	setGlobals(wp);
 	seed = setSeed(seed);
 	
