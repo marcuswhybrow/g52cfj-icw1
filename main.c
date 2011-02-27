@@ -91,6 +91,7 @@ void playRound(char* word) {
 	char input[100];
 	unsigned short guesses = maxWrongGuesses;
 	char guessedWord[strlen(word)];
+	char guessedSoFar[strlen(word)+guesses];
 	char letters[27];
 	unsigned short lettersRemaining = strlen(word);
 	int charIndex;
@@ -111,10 +112,14 @@ void playRound(char* word) {
 		printf("\n-\n\n");
 		printf("Guess the word : '%s'\n", guessedWord);
 		printf("Available      : %s\n", letters);
+		printf("Guessed so far : %s\n", guessedSoFar);
 		printf("%d more wrong guesses permitted.\n", guesses);
 		printf("%s\n", word);
 		printf("Type the letter of your guess and ENTER/RETURN: ");
 		fgets(input, 100, stdin);
+		
+		char guess[2] = {input[0], '\0'};
+		strcat(guessedSoFar, guess);
 		
 		charIndex = hasUdiscoveredChar(input[0], guessedWord, word);
 		if (charIndex >= 0) {
