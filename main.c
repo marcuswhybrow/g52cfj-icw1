@@ -46,7 +46,7 @@ int hasUdiscoveredChar(char c, char* guessedWord, char* word) {
 	return -1;
 }
 
-void play(char* word) {
+void playRound(char* word) {
 	char input[100];
 	unsigned short guesses = 10;
 	char guessedWord[strlen(word)];
@@ -133,7 +133,7 @@ int main (int argc, const char* argv[]) {
 	printf("Load dictionary from file: '%s'\n", wordsPath);
 	printf("%d words with max length %d\n", dictInfo.wordCount, dictInfo.longestWordLength);
 	
-	play(word);
+	playRound(word);
 	
     return 0;
 }
