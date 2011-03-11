@@ -100,10 +100,12 @@ char* getWord(int index, char* path) {
 	char word[longestWordLength];
 	FILE* file = fopen(path, "r");
 	unsigned int count;
+    char* w;
+    
 	for (count = 0; ! feof(file) && count < index; count++)
 		fscanf(file, "%s\n", word);
 	fclose(file);
-	char* w = calloc(strlen(word)+1, sizeof(char));
+	w = calloc(strlen(word)+1, sizeof(char));
 	strcpy(w, word);
 	return w;
 }
@@ -136,18 +138,19 @@ void playRound(char* word) {
 	RoundResultItem* currentItem;
 	char* path;
 	FILE* file;
+    char c;
+    unsigned short i;
 	
 	strcpy(guessedWord, word);
 	strcpy(guessedSoFar, "");
 	
 	/* Populate the available letters array */
-	char c;
+	
 	for (c = 'A'; (int)c <= (int)'Z'; c++)
 		letters[c - 'A'] = c;
 	letters[26] = '\0';
 	
 	/* Fill the guessedWord with '-' in order to hide the letters */
-	unsigned short i;
 	for (i = 0; i < strlen(guessedWord); i++)
 		guessedWord[i] = '-';
 	
