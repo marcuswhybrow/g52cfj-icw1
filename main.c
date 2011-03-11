@@ -175,7 +175,6 @@ void playRound(char* word) {
 			case '*':
 				/* Display the words that have been used so far, along with the guesses */
 				currentItem = results.tail;
-				int i;
 				for (i = 0; i < results.length; i++) {
 					printf("\nWord number : %d\n", i+1);
 					printf("Word        : '%s'\n", currentItem->word);
@@ -208,7 +207,6 @@ void playRound(char* word) {
 						/* Write to file */
 						file = fopen(path, "w");
 						currentItem = results.tail;
-						int i;
 						for (i = 0; i < results.length; i++) {
 							fprintf(file, "Word %d: '%s', '%s', '%s', '%s'\n",
 									i+1, currentItem->word, currentItem->finalState,
